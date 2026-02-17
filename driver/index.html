@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Bus Tracker - Driver</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: #FF9800;
+            color: white;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .login-form {
+            padding: 30px 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: #FF9800;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        
+        .btn:hover {
+            background: #F57C00;
+        }
+        
+        .btn-success {
+            background: #4CAF50;
+        }
+        
+        .btn-danger {
+            background: #f44336;
+        }
+        
+        .btn-success:hover {
+            background: #45a049;
+        }
+        
+        .btn-danger:hover {
+            background: #da190b;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .dashboard {
+            padding: 20px;
+        }
+        
+        .info-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .status-display {
+            text-align: center;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .status-active {
+            background: #e8f5e8;
+            color: #2e7d2e;
+            border: 2px solid #4CAF50;
+        }
+        
+        .status-inactive {
+            background: #ffe8e8;
+            color: #7d2e2e;
+            border: 2px solid #f44336;
+        }
+        
+        .location-info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-size: 14px;
+        }
+        
+        .speed-display {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            color: #FF9800;
+            margin: 10px 0;
+        }
+        
+        .error {
+            color: #f44336;
+            margin-top: 10px;
+            text-align: center;
+        }
+        
+        .success {
+            color: #4CAF50;
+            margin-top: 10px;
+            text-align: center;
+        }
+        
+        .tracking-controls {
+            margin: 20px 0;
+        }
+        
+        .logout-btn {
+            background: #f44336;
+            margin-top: 20px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 10px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Login Screen -->
+        <div id="login-screen">
+            <div class="header">
+                <h1>🚌 PIET Bus Tracker</h1>
+                <p>Driver Login</p>
+            </div>
+            <div class="login-form">
+                <div class="form-group">
+                    <label for="busId">Bus ID:</label>
+                    <input type="text" id="busId" placeholder="Enter your bus ID" required>
+                </div>
+                <div class="form-group">
+                    <label for="pin">PIN:</label>
+                    <input type="password" id="pin" placeholder="Enter your PIN" required>
+                </div>
+                <button class="btn" onclick="login()" id="login-btn">Login</button>
+
+                <div id="login-error" class="error hidden"></div>
+                <div id="login-loading" class="loading hidden"></div>
+            </div>
+        </div>
+
+        <!-- Driver Dashboard -->
+        <div id="dashboard" class="hidden">
+            <div class="header">
+                <h1>🚌 PIET Driver Panel</h1>
+                <p id="driver-name">Welcome, Driver</p>
+            </div>
+            
+            <div class="dashboard">
+                <!-- Bus Info -->
+                <div class="info-card">
+                    <h3>Bus Information</h3>
+                    <div id="bus-info">Loading...</div>
+                </div>
+
+                <!-- Tracking Status -->
+                <div class="status-display" id="tracking-status">
+                    <h3>Tracking Status</h3>
+                    <p>Not Started</p>
+                </div>
+
+                <!-- Location Display -->
+                <div class="location-info" id="location-display">
+                    <p><strong>Current Location:</strong> Getting location...</p>
+                    <p><strong>Speed:</strong> <span class="speed-display" id="speed">0</span> km/h</p>
+                    <p><strong>Last Updated:</strong> <span id="last-update">Never</span></p>
+                </div>
+
+                <!-- Tracking Controls -->
+                <div class="tracking-controls">
+                    <button class="btn btn-success" id="start-btn" onclick="startTracking()">
+                        Start Tracking
+                    </button>
+                    <button class="btn btn-danger hidden" id="stop-btn" onclick="stopTracking()">
+                        Stop Tracking
+                    </button>
+                </div>
+
+                <div id="status-message" class="success hidden"></div>
+
+                <button class="btn logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Centralized Configuration -->
+    <script src="../shared/config.js"></script>
+    
+    <script>
+        // API Configuration - Using centralized config
+        const API_KEY = CONFIG.API_KEY;
+        const SHEET_ID = CONFIG.SHEET_ID;
+        const APPS_SCRIPT_URL = CONFIG.APPS_SCRIPT_URL;
+
+        let currentDriver = null;
+        let isTracking = false;
+        let watchId = null;
+        let currentLocation = null;
+        let locationUpdateInterval = null;
+
+        // Utility function to fetch sheet data
+        async function getSheet(sheetName) {
+            const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${sheetName}?key=${API_KEY}`;
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                return data.values || [];
+            } catch (error) {
+                console.error('Error fetching sheet:', error);
+                return [];
+            }
+        }
+
+        // Update bus status via Apps Script
+        async function updateBusStatusOnLogin(busId, status) {
+            try {
+                const formData = new FormData();
+                formData.append('action', 'updateBusStatus');
+                formData.append('busId', busId);
+                formData.append('status', status);
+
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    showMessage(`Bus status updated to ${status}`);
+                }
+            } catch (error) {
+                console.error('Error updating bus status:', error);
+            }
+        }
+
+        // Update bus location in sheets
+        async function updateBusLocation(busId, lat, lng, speed) {
+            const timestamp = new Date().toISOString();
+            
+            try {
+                const formData = new FormData();
+                formData.append('action', 'updateBusLocation'); 
+                formData.append('busId', busId); 
+                formData.append('lat', lat); 
+                formData.append('lng', lng); 
+                formData.append('speed', speed);
+                formData.append('timestamp', timestamp);
+
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        console.log('Location updated successfully');
+                    } else {
+                        console.error('Failed to update location:', result.error);
+                    }
+                } else {
+                    console.error('Failed to send location data');
+                }
+            } catch (error) {
+                console.error('Error updating bus location:', error);
+            }
+        }
+
+        // Clear bus location when tracking stops
+        async function clearBusLocation(busId) {
+            try {
+                const formData = new FormData();
+                formData.append('action', 'clearBusLocation'); // Fixed: Changed from 'clearLocation' to 'clearBusLocation'
+                formData.append('busId', busId);
+
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                }
+            } catch (error) {
+                console.error('Error clearing bus location:', error);
+            }
+        }
+
+        // Login function
+        async function login() {
+            const busId = document.getElementById('busId').value.trim();
+            const pin = document.getElementById('pin').value.trim();
+            
+            if (!busId || !pin) {
+                showError('Please enter both Bus ID and PIN');
+                return;
+            }
+
+            // Show loading state
+            const loginBtn = document.getElementById('login-btn');
+            const loadingDiv = document.getElementById('login-loading');
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Logging in...';
+            loadingDiv.classList.remove('hidden');
+
+            try {
+                const drivers = await getSheet('Drivers');
+                
+                let driver = null;
+                
+                if (drivers.length > 1) {
+                    for (let i = 1; i < drivers.length; i++) {
+                        if (drivers[i][0] === busId && drivers[i][3] === pin) {
+                            driver = {
+                                busId: drivers[i][0],
+                                name: drivers[i][1],
+                                phone: drivers[i][2],
+                                pin: drivers[i][3]
+                            };
+                            break;
+                        }
+                    }
+                }
+
+                if (driver) {
+                    currentDriver = driver;
+                    document.getElementById('driver-name').textContent = `Welcome, ${driver.name}`;
+                    
+                    // Auto-update bus status to active
+                    await updateBusStatusOnLogin(busId, 'active');
+                    
+                    await loadBusInfo();
+                    showDashboard();
+                } else {
+                    showError('Invalid Bus ID or PIN');
+                }
+            } catch (error) {
+                showError('Login failed. Please try again.');
+                console.error('Login error:', error);
+            } finally {
+                // Reset loading state
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Login';
+                loadingDiv.classList.add('hidden');
+            }
+        }
+
+        // Load bus information
+        async function loadBusInfo() {
+            try {
+                const buses = await getSheet('Buses');
+                let busInfo = null;
+                
+                if (buses.length > 1) {
+                    for (let i = 1; i < buses.length; i++) {
+                        if (buses[i][0] === currentDriver.busId) {
+                            busInfo = {
+                                busId: buses[i][0],
+                                route: buses[i][1] || 'Not assigned',
+                                driver: buses[i][2] || 'Not assigned',
+                                phone: buses[i][3] || 'Not provided',
+                                capacity: buses[i][4] || 'Not specified',
+                                status: buses[i][5] || 'inactive',
+                                startTime: buses[i][6] || 'Not set',
+                                endTime: buses[i][7] || 'Not set',
+                                routeKey: buses[i][8] || ''
+                            };
+                            break;
+                        }
+                    }
+                }
+
+                if (busInfo) {
+                    const busInfoDiv = document.getElementById('bus-info');
+                    busInfoDiv.innerHTML = `
+                        <p><strong>Bus ID:</strong> ${busInfo.busId}</p>
+                        <p><strong>Route:</strong> ${busInfo.route}</p>
+                        <p><strong>Driver:</strong> ${busInfo.driver}</p>
+                        <p><strong>Phone:</strong> ${busInfo.phone}</p>
+                        <p><strong>Capacity:</strong> ${busInfo.capacity}</p>
+                        <p><strong>Schedule:</strong> ${busInfo.startTime} - ${busInfo.endTime}</p>
+                        <p><strong>Status:</strong> <span style="color: ${busInfo.status === 'active' ? '#4CAF50' : '#f44336'}">${busInfo.status.toUpperCase()}</span></p>
+                    `;
+                } else {
+                    document.getElementById('bus-info').innerHTML = '<p>Bus information not found</p>';
+                }
+            } catch (error) {
+                console.error('Error loading bus info:', error);
+                document.getElementById('bus-info').innerHTML = '<p>Error loading bus information</p>';
+            }
+        }
+
+        // Show error message
+        function showError(message) {
+            const errorDiv = document.getElementById('login-error');
+            errorDiv.textContent = message;
+            errorDiv.classList.remove('hidden');
+            setTimeout(() => {
+                errorDiv.classList.add('hidden');
+            }, 5000);
+        }
+
+        // Show success message
+        function showMessage(message, isSuccess = true) {
+            const messageDiv = document.getElementById('status-message');
+            messageDiv.textContent = message;
+            messageDiv.className = isSuccess ? 'success' : 'error';
+            messageDiv.classList.remove('hidden');
+            setTimeout(() => {
+                messageDiv.classList.add('hidden');
+            }, 3000);
+        }
+
+        // Show dashboard
+        function showDashboard() {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+        }
+
+        // Start tracking
+        function startTracking() {
+            if (!navigator.geolocation) {
+                showMessage('Geolocation is not supported by this browser.', false);
+                return;
+            }
+
+            isTracking = true;
+            updateTrackingStatus();
+            
+            // Update bus status to active when tracking starts
+            if (currentDriver) {
+                updateBusStatusOnLogin(currentDriver.busId, 'active');
+            }
+            
+            // Request location permission and start watching
+            watchId = navigator.geolocation.watchPosition(
+                updateLocation,
+                handleLocationError,
+                {
+                    enableHighAccuracy: true,
+                    timeout: 15000,
+                    maximumAge: 5000
+                }
+            );
+
+            // Set up regular location updates (every 30 seconds)
+            locationUpdateInterval = setInterval(() => {
+                if (currentLocation && isTracking && currentDriver) {
+                    updateBusLocation(currentDriver.busId, currentLocation.lat, currentLocation.lng, currentLocation.speed);
+                }
+            }, 30000);
+
+            document.getElementById('start-btn').classList.add('hidden');
+            document.getElementById('stop-btn').classList.remove('hidden');
+            
+            showMessage('Tracking started successfully!');
+        }
+
+        // Stop tracking
+        function stopTracking() {
+            if (watchId) {
+                navigator.geolocation.clearWatch(watchId);
+                watchId = null;
+            }
+
+            if (locationUpdateInterval) {
+                clearInterval(locationUpdateInterval);
+                locationUpdateInterval = null;
+            }
+
+            isTracking = false;
+            updateTrackingStatus();
+            
+            // Clear location and update bus status to inactive when tracking stops
+            if (currentDriver) {
+                clearBusLocation(currentDriver.busId);
+                updateBusStatusOnLogin(currentDriver.busId, 'inactive');
+            }
+            
+            document.getElementById('start-btn').classList.remove('hidden');
+            document.getElementById('stop-btn').classList.add('hidden');
+            
+            showMessage('Tracking stopped.');
+        }
+
+        // Update tracking status display
+        function updateTrackingStatus() {
+            const statusDiv = document.getElementById('tracking-status');
+            if (isTracking) {
+                statusDiv.className = 'status-display status-active';
+                statusDiv.innerHTML = '<h3>Tracking Status</h3><p>🟢 ACTIVE - Location being tracked</p>';
+            } else {
+                statusDiv.className = 'status-display status-inactive';
+                statusDiv.innerHTML = '<h3>Tracking Status</h3><p>🔴 STOPPED - Not tracking location</p>';
+            }
+        }
+
+        // Update location
+        async function updateLocation(position) {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            const speed = position.coords.speed || 0;
+            const speedKmh = Math.max(0, Math.round((speed * 3.6) || 0)); // Convert m/s to km/h, ensure non-negative
+
+            currentLocation = { lat, lng, speed: speedKmh };
+
+            // Update UI
+            document.getElementById('speed').textContent = speedKmh;
+            document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
+            
+            const locationDisplay = document.getElementById('location-display');
+            locationDisplay.innerHTML = `
+                <p><strong>Current Location:</strong> ${lat.toFixed(6)}, ${lng.toFixed(6)}</p>
+                <p><strong>Speed:</strong> <span class="speed-display">${speedKmh}</span> km/h</p>
+                <p><strong>Last Updated:</strong> ${new Date().toLocaleTimeString()}</p>
+            `;
+
+            // Update location in Google Sheets immediately for the first update
+            if (isTracking && currentDriver) {
+                try {
+                    await updateBusLocation(currentDriver.busId, lat, lng, speedKmh);
+                } catch (error) {
+                    console.error('Error updating location in sheets:', error);
+                }
+            }
+        }
+
+        // Handle location error
+        function handleLocationError(error) {
+            let message = 'Unknown location error';
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    message = 'Location access denied. Please enable location services.';
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    message = 'Location information is unavailable.';
+                    break;
+                case error.TIMEOUT:
+                    message = 'Location request timed out. Retrying...';
+                    break;
+            }
+            showMessage(message, false);
+            console.error('Location error:', error);
+
+            // If permission denied, stop tracking
+            if (error.code === error.PERMISSION_DENIED && isTracking) {
+                stopTracking();
+            }
+        }
+
+        // Logout function
+        async function logout() {
+            if (isTracking) {
+                stopTracking();
+            }
+            
+            // Auto-update bus status to inactive before logout
+            if (currentDriver) {
+                await updateBusStatusOnLogin(currentDriver.busId, 'inactive');
+            }
+            
+            currentDriver = null;
+            currentLocation = null;
+            
+            document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('busId').value = '';
+            document.getElementById('pin').value = '';
+            
+            // Reset UI elements
+            document.getElementById('speed').textContent = '0';
+            document.getElementById('last-update').textContent = 'Never';
+            document.getElementById('location-display').innerHTML = `
+                <p><strong>Current Location:</strong> Getting location...</p>
+                <p><strong>Speed:</strong> <span class="speed-display">0</span> km/h</p>
+                <p><strong>Last Updated:</strong> Never</p>
+            `;
+        }
+
+        // Handle enter key in login form
+        document.getElementById('pin').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                login();
+            }
+        });
+
+        document.getElementById('busId').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                login();
+            }
+        });
+
+        // Handle page visibility change
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden && isTracking) {
+                debugLog('App hidden, tracking continues in background');
+            } else if (!document.hidden && isTracking) {
+                debugLog('App visible, tracking active');
+            }
+        });
+
+        // Initialize
+        updateTrackingStatus();
+        debugLog('Driver app initialized');
+
+        // Prevent app from sleeping on mobile when tracking
+        let wakeLock = null;
+        
+        async function requestWakeLock() {
+            try {
+                if ('wakeLock' in navigator && isTracking) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                    debugLog('Wake lock activated');
+                }
+            } catch (err) {
+                debugLog('Wake lock failed: ' + err.message);
+            }
+        }
+
+        function releaseWakeLock() {
+            if (wakeLock) {
+                wakeLock.release();
+                wakeLock = null;
+                debugLog('Wake lock released');
+            }
+        }
+
+        // Request wake lock when tracking starts
+        const originalStartTracking = startTracking;
+        startTracking = function() {
+            originalStartTracking();
+            requestWakeLock();
+        };
+
+        // Release wake lock when tracking stops
+        const originalStopTracking = stopTracking;
+        stopTracking = function() {
+            originalStopTracking();
+            releaseWakeLock();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Bus Tracker --m Admin Panel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: #9C27B0;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .login-form {
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 30px 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            background: #9C27B0;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .btn:hover {
+            background: #7B1FA2;
+        }
+        
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .btn-full {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+        }
+        
+        .btn-success {
+            background: #4CAF50;
+        }
+        
+        .btn-success:hover {
+            background: #45a049;
+        }
+        
+        .btn-danger {
+            background: #f44336;
+        }
+        
+        .btn-danger:hover {
+            background: #da190b;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .dashboard {
+            padding: 20px;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            border-bottom: 2px solid #ddd;
+            margin-bottom: 20px;
+        }
+        
+        .nav-tab {
+            padding: 15px 25px;
+            background: #f9f9f9;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .nav-tab.active {
+            background: #9C27B0;
+            color: white;
+            border-bottom-color: #9C27B0;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+        }
+        
+        .data-table th,
+        .data-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            font-size: 14px;
+        }
+        
+        .data-table th {
+            background: #f5f5f5;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+        }
+        
+        .data-table tr:hover {
+            background: #f9f9f9;
+        }
+        
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            color: white;
+            font-size: 12px;
+        }
+        
+        .status-active {
+            background: #4CAF50;
+        }
+        
+        .status-inactive {
+            background: #f44336;
+        }
+        
+        .status-approved {
+            background: #4CAF50;
+        }
+        
+        .status-pending {
+            background: #FF9800;
+        }
+        
+        .status-rejected {
+            background: #f44336;
+        }
+        
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #9C27B0;
+        }
+        
+        .stat-label {
+            margin-top: 5px;
+            color: #666;
+        }
+        
+        .refresh-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #9C27B0;
+            color: white;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        
+        .logout-btn {
+            background: #f44336;
+            float: right;
+        }
+        
+        .error {
+            color: #f44336;
+            margin-top: 10px;
+            text-align: center;
+        }
+        
+        .success {
+            color: #4CAF50;
+            margin-top: 10px;
+            text-align: center;
+        }
+        
+        .action-btns {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .btn-small {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 5px;
+            color: white;
+            z-index: 1000;
+            max-width: 300px;
+        }
+
+        .notification.success {
+            background: #4CAF50;
+        }
+
+        .notification.error {
+            background: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Login Screen -->
+        <div id="login-screen">
+            <div class="header">
+                <h1>🚌 PIET Bus Tracker</h1>
+                <p>Admin Panel</p>
+            </div>
+            <div class="login-form">
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" placeholder="Enter admin username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" placeholder="Enter admin password" required>
+                </div>
+                <button class="btn btn-full" onclick="login()">Login</button>
+                <div id="login-error" class="error hidden"></div>
+            </div>
+        </div>
+
+        <!-- Admin Dashboard -->
+        <div id="dashboard" class="hidden">
+            <div class="header">
+                <h1>🚌 PIET Bus Tracker Admin Dashboard</h1>
+                <button class="btn logout-btn" onclick="logout()">Logout</button>
+                <div style="clear: both;"></div>
+            </div>
+            
+            <div class="dashboard">
+                <!-- Statistics -->
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <div class="stat-number" id="total-students">0</div>
+                        <div class="stat-label">Total Students</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="total-buses">0</div>
+                        <div class="stat-label">Total Buses</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="active-buses">0</div>
+                        <div class="stat-label">Active Buses</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="pending-approvals">0</div>
+                        <div class="stat-label">Pending Approvals</div>
+                    </div>
+                </div>
+
+                <!-- Navigation Tabs -->
+                <div class="nav-tabs">
+                    <button class="nav-tab active" onclick="showTab('students')">Students</button>
+                    <button class="nav-tab" onclick="showTab('buses')">Buses</button>
+                    <button class="nav-tab" onclick="showTab('locations')">Live Locations</button>
+                    <button class="nav-tab" onclick="showTab('drivers')">Drivers</button>
+                </div>
+
+                <!-- Students Tab -->
+                <div id="students-tab" class="tab-content active">
+                    <h3>Student Management</h3>
+                    <div class="loading" id="students-loading">Loading students...</div>
+                    <table class="data-table hidden" id="students-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Student ID</th>
+                                <th>Roll</th>
+                                <th>Department</th>
+                                <th>Phone</th>
+                                <th>Email</th>
+                                <th>Status</th>
+                                <th>Register Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+                <!-- Buses Tab -->
+                <div id="buses-tab" class="tab-content">
+                    <h3>Bus Management</h3>
+                    <div class="loading" id="buses-loading">Loading buses...</div>
+                    <table class="data-table hidden" id="buses-table">
+                        <thead>
+                            <tr>
+                                <th>Bus ID</th>
+                                <th>Route</th>
+                                <th>Driver</th>
+                                <th>Phone</th>
+                                <th>Capacity</th>
+                                <th>Status</th>
+                                <th>Start Time</th>
+                                <th>End Time</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+                <!-- Live Locations Tab -->
+                <div id="locations-tab" class="tab-content">
+                    <h3>Live Bus Locations</h3>
+                    <div class="loading" id="locations-loading">Loading locations...</div>
+                    <table class="data-table hidden" id="locations-table">
+                        <thead>
+                            <tr>
+                                <th>Bus ID</th>
+                                <th>Latitude</th>
+                                <th>Longitude</th>
+                                <th>Speed (km/h)</th>
+                                <th>Last Update</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+                <!-- Drivers Tab -->
+                <div id="drivers-tab" class="tab-content">
+                    <h3>Driver Management</h3>
+                    <div class="loading" id="drivers-loading">Loading drivers...</div>
+                    <table class="data-table hidden" id="drivers-table">
+                        <thead>
+                            <tr>
+                                <th>Bus ID</th>
+                                <th>Driver Name</th>
+                                <th>Phone</th>
+                                <th>PIN</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="refresh-btn hidden" id="refresh-btn" onclick="loadAllData()">↻</button>
+
+    <!-- Centralized Configuration -->
+    <script src="../shared/config.js"></script>
+    
+    <script>
+        // API Configuration - Using centralized config
+        const API_KEY = CONFIG.API_KEY;
+        const SHEET_ID = CONFIG.SHEET_ID;
+        const APPS_SCRIPT_URL = CONFIG.APPS_SCRIPT_URL;
+        
+        // Admin credentials
+        const ADMIN_USERNAME = 'admin';
+        const ADMIN_PASSWORD = 'admin123';
+
+        let currentTab = 'students';
+        let studentsData = [];
+
+        // Utility function to fetch sheet data
+        async function getSheet(sheetName) {
+            const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${sheetName}?key=${API_KEY}`;
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                return data.values || [];
+            } catch (error) {
+                console.error('Error fetching sheet:', error);
+                return [];
+            }
+        }
+
+        // Call Apps Script function - ENHANCED WITH DEBUGGING
+        async function callAppsScript(action, params = {}) {
+            console.log('=== CALLING APPS SCRIPT ===');
+            console.log('Action:', action);
+            console.log('Parameters:', params);
+            console.log('Apps Script URL:', APPS_SCRIPT_URL);
+
+            try {
+                const formData = new FormData();
+                formData.append('action', action);
+                
+                // Add all parameters to form data
+                Object.keys(params).forEach(key => {
+                    const value = params[key];
+                    console.log(`Adding param: ${key} = "${value}" (type: ${typeof value})`);
+                    formData.append(key, String(value));
+                });
+
+                console.log('Sending POST request...');
+
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                console.log('Response received:');
+                console.log('Status:', response.status);
+                console.log('Status Text:', response.statusText);
+                console.log('OK:', response.ok);
+
+                if (response.ok) {
+                    const responseText = await response.text();
+                    console.log('Raw response text:', responseText);
+                    
+                    try {
+                        const result = JSON.parse(responseText);
+                        console.log('Parsed result:', result);
+                        console.log('=== APPS SCRIPT CALL SUCCESS ===');
+                        return result;
+                    } catch (parseError) {
+                        console.error('JSON Parse Error:', parseError);
+                        console.error('Response was not valid JSON:', responseText);
+                        return { 
+                            success: false, 
+                            error: 'Invalid response from server: ' + responseText.substring(0, 200)
+                        };
+                    }
+                } else {
+                    console.error('HTTP Error:', response.status, response.statusText);
+                    const errorText = await response.text().catch(() => 'Could not read error response');
+                    console.error('Error response:', errorText);
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+            } catch (error) {
+                console.error('=== APPS SCRIPT CALL ERROR ===');
+                console.error('Error type:', error.name);
+                console.error('Error message:', error.message);
+                console.error('Error stack:', error.stack);
+                console.error('=== END APPS SCRIPT ERROR ===');
+                
+                return { 
+                    success: false, 
+                    error: 'Network error: ' + error.message,
+                    details: {
+                        action: action,
+                        params: params,
+                        timestamp: new Date().toISOString()
+                    }
+                };
+            }
+        }
+
+        // Show notification
+        function showNotification(message, isSuccess = true) {
+            // Remove existing notifications
+            const existingNotifications = document.querySelectorAll('.notification');
+            existingNotifications.forEach(notif => notif.remove());
+
+            const notification = document.createElement('div');
+            notification.className = `notification ${isSuccess ? 'success' : 'error'}`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // Auto remove after 4 seconds
+            setTimeout(() => {
+                notification.remove();
+            }, 4000);
+        }
+
+        // Login function
+        function login() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            
+            if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+                showDashboard();
+                loadAllData();
+            } else {
+                showError('Invalid username or password');
+            }
+        }
+
+        // Show error message
+        function showError(message) {
+            const errorDiv = document.getElementById('login-error');
+            errorDiv.textContent = message;
+            errorDiv.classList.remove('hidden');
+            setTimeout(() => {
+                errorDiv.classList.add('hidden');
+            }, 5000);
+        }
+
+        // Show dashboard
+        function showDashboard() {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            document.getElementById('refresh-btn').classList.remove('hidden');
+        }
+
+        // Show tab
+        function showTab(tabName) {
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(tab => tab.classList.remove('active'));
+            
+            // Remove active from all tabs
+            const tabs = document.querySelectorAll('.nav-tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Show selected tab
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.target.classList.add('active');
+            
+            currentTab = tabName;
+        }
+
+        // Load all data
+        async function loadAllData() {
+            try {
+                const [students, buses, locations, drivers] = await Promise.all([
+                    getSheet('Students'),
+                    getSheet('Buses'),
+                    getSheet('LiveLocations'),
+                    getSheet('Drivers')
+                ]);
+
+                studentsData = students; // Store for later use
+                loadStudents(students);
+                loadBuses(buses);
+                loadLocations(locations);
+                loadDrivers(drivers);
+                updateStats(students, buses);
+            } catch (error) {
+                console.error('Error loading data:', error);
+                showNotification('Error loading data. Please try again.', false);
+            }
+        }
+
+        // Load students - UPDATED WITH BOTH AUTO AND MANUAL APPROVE
+        function loadStudents(students) {
+            const loading = document.getElementById('students-loading');
+            const table = document.getElementById('students-table');
+            const tbody = table.querySelector('tbody');
+            
+            loading.classList.add('hidden');
+            table.classList.remove('hidden');
+            tbody.innerHTML = '';
+
+            if (students.length > 1) {
+                for (let i = 1; i < students.length; i++) {
+                    const row = students[i];
+                    const tr = document.createElement('tr');
+                    
+                    const status = row[6] || 'pending';
+                    let statusClass = 'status-pending';
+                    if (status === 'approved') statusClass = 'status-approved';
+                    if (status === 'rejected') statusClass = 'status-rejected';
+                    
+                    const registrationDate = row[8] ? new Date(row[8]).toLocaleDateString() : 'N/A';
+                    
+                    tr.innerHTML = `
+                        <td>${row[0] || ''}</td>
+                        <td>${row[1] || ''}</td>
+                        <td>${row[2] || ''}</td>
+                        <td>${row[3] || ''}</td>
+                        <td>${row[4] || ''}</td>
+                        <td>${row[7] || 'N/A'}</td>
+                        <td><span class="status-badge ${statusClass}">${status.toUpperCase()}</span></td>
+                        <td>${registrationDate}</td>
+                        <td class="action-btns">
+                            ${status !== 'approved' ? `
+                                <button class="btn btn-success btn-small" onclick="approveStudent('${row[2]}')" title="Auto approve with email">Auto Approve</button>
+                                <button class="btn btn-success btn-small" onclick="manualApproveStudent('${row[2]}')" title="Manual approval instructions" style="background: #FF9800;">Manual</button>
+                            ` : ''}
+                            ${status !== 'rejected' ? `<button class="btn btn-danger btn-small" onclick="rejectStudent('${row[2]}')">Reject</button>` : ''}
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                }
+            } else {
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align: center;">No students found</td></tr>';
+            }
+        }
+
+        // Load buses
+        function loadBuses(buses) {
+            const loading = document.getElementById('buses-loading');
+            const table = document.getElementById('buses-table');
+            const tbody = table.querySelector('tbody');
+            
+            loading.classList.add('hidden');
+            table.classList.remove('hidden');
+            tbody.innerHTML = '';
+
+            if (buses.length > 1) {
+                for (let i = 1; i < buses.length; i++) {
+                    const row = buses[i];
+                    const tr = document.createElement('tr');
+                    
+                    const status = row[5] || 'inactive';
+                    const statusClass = status === 'active' ? 'status-active' : 'status-inactive';
+                    
+                    tr.innerHTML = `
+                        <td>${row[0] || ''}</td>
+                        <td>${row[1] || ''}</td>
+                        <td>${row[2] || ''}</td>
+                        <td>${row[3] || ''}</td>
+                        <td>${row[4] || ''}</td>
+                        <td><span class="status-badge ${statusClass}">${status.toUpperCase()}</span></td>
+                        <td>${row[6] || ''}</td>
+                        <td>${row[7] || ''}</td>
+                        <td class="action-btns">
+                            <button class="btn btn-small" onclick="toggleBusStatus('${row[0]}', '${status}')">${status === 'active' ? 'Deactivate' : 'Activate'}</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                }
+            } else {
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align: center;">No buses found</td></tr>';
+            }
+        }
+
+        // Load locations
+        function loadLocations(locations) {
+            const loading = document.getElementById('locations-loading');
+            const table = document.getElementById('locations-table');
+            const tbody = table.querySelector('tbody');
+            
+            loading.classList.add('hidden');
+            table.classList.remove('hidden');
+            tbody.innerHTML = '';
+
+            if (locations.length > 1) {
+                for (let i = 1; i < locations.length; i++) {
+                    const row = locations[i];
+                    const tr = document.createElement('tr');
+                    
+                    const lastUpdate = row[4] ? new Date(row[4]).toLocaleString() : 'Never';
+                    const trackingStatus = row[5] || 'inactive';
+                    const statusClass = trackingStatus === 'active' ? 'status-active' : 'status-inactive';
+                    
+                    tr.innerHTML = `
+                        <td>${row[0] || ''}</td>
+                        <td>${row[1] ? parseFloat(row[1]).toFixed(6) : 'N/A'}</td>
+                        <td>${row[2] ? parseFloat(row[2]).toFixed(6) : 'N/A'}</td>
+                        <td>${row[3] || '0'}</td>
+                        <td>${lastUpdate}</td>
+                        <td><span class="status-badge ${statusClass}">${trackingStatus.toUpperCase()}</span></td>
+                        <td class="action-btns">
+                            ${row[1] && row[2] ? `<button class="btn btn-small" onclick="viewOnMap(${row[1]}, ${row[2]})">View Map</button>` : '<span style="color: #999;">No Location</span>'}
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                }
+            } else {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No location data found</td></tr>';
+            }
+        }
+
+        // Load drivers
+        function loadDrivers(drivers) {
+            const loading = document.getElementById('drivers-loading');
+            const table = document.getElementById('drivers-table');
+            const tbody = table.querySelector('tbody');
+            
+            loading.classList.add('hidden');
+            table.classList.remove('hidden');
+            tbody.innerHTML = '';
+
+            if (drivers.length > 1) {
+                for (let i = 1; i < drivers.length; i++) {
+                    const row = drivers[i];
+                    const tr = document.createElement('tr');
+                    
+                    tr.innerHTML = `
+                        <td>${row[0] || ''}</td>
+                        <td>${row[1] || ''}</td>
+                        <td>${row[2] || ''}</td>
+                        <td>${row[3] || ''}</td>
+                        <td class="action-btns">
+                            <button class="btn btn-small" onclick="resetDriverPin('${row[0]}')">Reset PIN</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                }
+            } else {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No drivers found</td></tr>';
+            }
+        }
+
+        // Update statistics
+        function updateStats(students, buses) {
+            const totalStudents = students.length > 1 ? students.length - 1 : 0;
+            const totalBuses = buses.length > 1 ? buses.length - 1 : 0;
+            
+            let activeBuses = 0;
+            let pendingApprovals = 0;
+
+            // Count active buses
+            if (buses.length > 1) {
+                for (let i = 1; i < buses.length; i++) {
+                    if (buses[i][5] === 'active') {
+                        activeBuses++;
+                    }
+                }
+            }
+
+            // Count pending student approvals
+            if (students.length > 1) {
+                for (let i = 1; i < students.length; i++) {
+                    const status = students[i][6] || 'pending';
+                    if (status === 'pending') {
+                        pendingApprovals++;
+                    }
+                }
+            }
+
+            document.getElementById('total-students').textContent = totalStudents;
+            document.getElementById('total-buses').textContent = totalBuses;
+            document.getElementById('active-buses').textContent = activeBuses;
+            document.getElementById('pending-approvals').textContent = pendingApprovals;
+        }
+
+        // Approve student - WORKING VERSION
+        async function approveStudent(roll) {
+            if (!roll) {
+                showNotification('Error: No roll number provided', false);
+                return;
+            }
+
+            const confirmed = confirm(`Are you sure you want to approve student with roll number: ${roll}?`);
+            if (!confirmed) return;
+
+            showNotification('Processing approval...', true);
+
+            try {
+                const result = await callAppsScript('updateStudentStatus', {
+                    roll: roll,
+                    status: 'approved'
+                });
+
+                if (result && result.success) {
+                    showNotification(`Student ${roll} approved successfully!`, true);
+                    loadAllData(); // Reload all data
+                } else {
+                    const errorMsg = result?.error || result?.message || 'Unknown error occurred';
+                    showNotification(`Error approving student: ${errorMsg}`, false);
+                    console.error('Full error response:', result);
+                }
+            } catch (error) {
+                console.error('Error approving student:', error);
+                showNotification('Error: Apps Script may not be configured. Check console for details.', false);
+            }
+        }
+
+        // Reject student - WORKING VERSION
+        async function rejectStudent(roll) {
+            if (!roll) {
+                showNotification('Error: No roll number provided', false);
+                return;
+            }
+
+            const confirmed = confirm(`Are you sure you want to reject student with roll number: ${roll}?`);
+            if (!confirmed) return;
+
+            showNotification('Processing rejection...', true);
+
+            try {
+                const result = await callAppsScript('updateStudentStatus', {
+                    roll: roll,
+                    status: 'rejected'
+                });
+
+                if (result && result.success) {
+                    showNotification(`Student ${roll} rejected successfully!`, true);
+                    loadAllData(); // Reload all data
+                } else {
+                    const errorMsg = result?.error || result?.message || 'Unknown error occurred';
+                    showNotification(`Error rejecting student: ${errorMsg}`, false);
+                    console.error('Full error response:', result);
+                }
+            } catch (error) {
+                console.error('Error rejecting student:', error);
+                showNotification('Error: Apps Script may not be configured. Check console for details.', false);
+            }
+        }
+
+        // Toggle bus status - WORKING VERSION
+        async function toggleBusStatus(busId, currentStatus) {
+            if (!busId) {
+                showNotification('Error: No bus ID provided', false);
+                return;
+            }
+
+            const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+            const action = newStatus === 'active' ? 'activate' : 'deactivate';
+            
+            const confirmed = confirm(`Are you sure you want to ${action} bus ${busId}?`);
+            if (!confirmed) return;
+
+            showNotification(`Processing bus ${action}...`, true);
+
+            try {
+                const result = await callAppsScript('updateBusStatus', {
+                    busId: busId,
+                    status: newStatus
+                });
+
+                if (result && result.success) {
+                    showNotification(`Bus ${busId} ${action}d successfully!`, true);
+                    loadAllData(); // Reload all data
+                } else {
+                    const errorMsg = result?.error || result?.message || 'Unknown error occurred';
+                    showNotification(`Error updating bus status: ${errorMsg}`, false);
+                    console.error('Full error response:', result);
+                }
+            } catch (error) {
+                console.error('Error updating bus status:', error);
+                showNotification('Error: Apps Script may not be configured. Check console for details.', false);
+            }
+        }
+
+        // Reset driver PIN - WORKING VERSION
+        async function resetDriverPin(busId) {
+            if (!busId) {
+                showNotification('Error: No bus ID provided', false);
+                return;
+            }
+
+            const newPin = prompt('Enter new 4-digit PIN for the driver:');
+            if (!newPin) return;
+
+            // Validate PIN
+            if (newPin.length !== 4 || !/^\d+$/.test(newPin)) {
+                showNotification('PIN must be exactly 4 digits', false);
+                return;
+            }
+
+            showNotification('Updating driver PIN...', true);
+
+            try {
+                const result = await callAppsScript('resetDriverPin', {
+                    busId: busId,
+                    newPin: newPin
+                });
+
+                if (result && result.success) {
+                    showNotification(`PIN updated successfully for bus ${busId}!`, true);
+                    loadAllData(); // Reload all data
+                } else {
+                    const errorMsg = result?.error || result?.message || 'Unknown error occurred';
+                    showNotification(`Error updating PIN: ${errorMsg}`, false);
+                    console.error('Full error response:', result);
+                }
+            } catch (error) {
+                console.error('Error updating driver PIN:', error);
+                showNotification('Error: Apps Script may not be configured. Check console for details.', false);
+            }
+        }
+
+        // View location on map
+        function viewOnMap(lat, lng) {
+            if (lat && lng && lat !== 0 && lng !== 0) {
+                const url = `https://www.google.com/maps?q=${lat},${lng}&z=15&t=m`;
+                window.open(url, '_blank');
+            } else {
+                showNotification('Location data not available', false);
+            }
+        }
+
+        // Logout function
+        function logout() {
+            document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('refresh-btn').classList.add('hidden');
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+        }
+
+        // Auto refresh every 60 seconds
+        setInterval(() => {
+            if (!document.getElementById('dashboard').classList.contains('hidden')) {
+                loadAllData();
+            }
+        }, 60000);
+
+        // Handle enter key in login form
+        document.getElementById('password').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                login();
+            }
+        });
+
+        document.getElementById('username').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                document.getElementById('password').focus();
+            }
+        });
+    </script>
+</body>
+</html>
